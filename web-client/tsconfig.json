@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": ["src/*"],
+      "@shared/*": ["../packages/shared/*"],
+      "@types": ["src/types/index.ts"],
+      "@logger": ["src/services/LoggerService.ts"],
+      "@mcp-trace/*": ["../packages/mcp-trace/*"],
+      "@cherrystudio/ai-core/*": ["../packages/aiCore/src/*"],
+      "@cherrystudio/extension-table-plus/*": ["../packages/extension-table-plus/src/*"],
+      "@cherrystudio/ai-sdk-provider/*": ["../packages/ai-sdk-provider/src/*"]
+    }
+  },
+  "include": ["src", "../packages/shared"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

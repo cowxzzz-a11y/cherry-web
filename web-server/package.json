@@ -1,0 +1,43 @@
+{
+  "name": "cherry-studio-web-server",
+  "version": "1.0.0",
+  "description": "Web backend for Cherry Studio",
+  "main": "dist/web-server/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node -r tsconfig-paths/register src/index.ts",
+    "dev": "nodemon --watch src --ext ts,json --ignore storage --ignore dist --exec ts-node -r tsconfig-paths/register src/index.ts"
+  },
+  "dependencies": {
+    "express": "^5.0.0",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "fs-extra": "^11.2.0",
+    "winston": "^3.17.0",
+    "uuid": "^11.0.0",
+    "dotenv": "^16.4.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "module-alias": "^2.2.3",
+    "tsconfig-paths": "^4.2.0",
+    "openai": "npm:@cherrystudio/openai@^6.15.0",
+    "@cherrystudio/embedjs": "^0.1.31",
+    "@cherrystudio/embedjs-interfaces": "^0.1.31",
+    "@cherrystudio/embedjs-libsql": "^0.1.31",
+    "@cherrystudio/embedjs-loader-sitemap": "^0.1.31",
+    "@cherrystudio/embedjs-loader-web": "^0.1.31",
+    "@cherrystudio/embedjs-ollama": "^0.1.31",
+    "@cherrystudio/embedjs-openai": "^0.1.31",
+    "zod": "^4.1.5",
+    "@mcp-trace/trace-core": "file:../packages/mcp-trace/trace-core"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/multer": "^1.4.12",
+    "@types/fs-extra": "^11.0.4",
+    "@types/uuid": "^10.0.0",
+    "@types/node": "^22.10.2",
+    "nodemon": "^3.1.9"
+  }
+}

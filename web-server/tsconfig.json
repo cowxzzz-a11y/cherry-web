@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "paths": {
+      "@logger": ["./src/services/LoggerService.ts"],
+      "@main/knowledge/*": ["./src/knowledge/*"],
+      "@main/services/CacheService": ["./src/services/CacheService.ts"],
+      "@main/services/FileStorage": ["./src/services/FileStorage.ts"],
+      "@main/services/LoggerService": ["./src/services/LoggerService.ts"],
+      "@main/services/MistralClientManager": ["./src/services/MistralClientManager.ts"],
+      "@main/services/ReduxService": ["./src/mocks/ReduxService.ts"],
+      "@main/services/WindowService": ["./src/mocks/WindowService.ts"],
+      "@main/services/remotefile/*": ["./src/services/remotefile/*"],
+      "@main/utils": ["./src/utils/index.ts"],
+      "@main/utils/*": ["./src/utils/*"],
+      "@mcp-trace/trace-core": ["../../cherry-web/packages/mcp-trace/trace-core/index.ts"],
+      "@shared/*": ["../../packages/shared/*"],
+      "@types": ["./src/types/index.ts"],
+      "electron": ["./src/mock-electron.ts"]
+    },
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "useDefineForClassFields": false
+  },
+  "exclude": ["node_modules", "../node_modules", "**/*.test.ts"],
+  "include": ["src/**/*", "../../packages/shared/**/*", "../../cherry-web/packages/mcp-trace/**/*"]
+}
