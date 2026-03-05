@@ -46,8 +46,9 @@ const CitationsList: React.FC<CitationsListProps> = ({ citations }) => {
 
   const popoverContent = (
     <PopoverContentContainer>
-      {citations.map((citation) => (
-        <PopoverContentItem key={citation.url || citation.number || citation.title}>
+      {citations.map((citation, index) => (
+        <PopoverContentItem
+          key={`${citation.type}-${citation.number ?? index}-${citation.url || citation.title || index}`}>
           {citation.type === 'websearch' && (
             <PopoverContent>
               <WebSearchCitation citation={citation} />
@@ -112,8 +113,11 @@ const CitationsList: React.FC<CitationsListProps> = ({ citations }) => {
 
 const handleLinkClick = (url: string, event: React.MouseEvent) => {
   event.preventDefault()
-  if (url.startsWith('http')) window.open(url, '_blank', 'noopener,noreferrer')
-  else window.api.file.openPath(url)
+  event.stopPropagation()
+  if (url.startsWith('http')) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+  // In web context, local file paths cannot be opened, so we do nothing for non-http URLs
 }
 
 const CopyButton: React.FC<{ content: string }> = ({ content }) => {

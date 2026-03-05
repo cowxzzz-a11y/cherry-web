@@ -385,7 +385,37 @@ router.post('/:id/search', async (req: AuthenticatedRequest, res) => {
       base: baseParams,
       search: query
     })
-    res.json(results)
+
+    // Enrich search results with file metadata from knowledge base items.
+    // The embedding DB stores UUID-based file paths as metadata.source,
+    // but the client needs original filenames for display.
+    // Build a map from file UUID to its FileMetadata stored in the knowledge base.
+    const fileIdToMetadataMap = new Map<string, any>()
+    if (base.items && Array.isArray(base.items)) {
+      for (const item of base.items) {
+        if (item.type === 'file' && item.content && typeof item.content === 'object' && !Array.isArray(item.content)) {
+          const content = item.content as Record<string, any>
+          if (content.id) {
+            fileIdToMetadataMap.set(content.id, content)
+          }
+        }
+      }
+    }
+
+    const enrichedResults = results.map((result: any) => {
+      if (result.metadata?.source) {
+        const source = result.metadata.source.replace(/\\/g, '/')
+        const lastSegment = source.split('/').pop() || ''
+        const fileId = lastSegment.split('.')[0]
+        const fileMetadata = fileIdToMetadataMap.get(fileId)
+        if (fileMetadata) {
+          result.file = fileMetadata
+        }
+      }
+      return result
+    })
+
+    res.json(enrichedResults)
   } catch (error: any) {
     const errMsg = error?.message || 'Unknown error'
     const errDetail = error?.response?.data || error?.cause || ''

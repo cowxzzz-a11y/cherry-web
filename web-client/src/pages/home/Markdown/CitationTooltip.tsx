@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import * as z from 'zod'
 
 export const CitationSchema = z.object({
-  url: z.string().url(),
+  url: z.string(),
   title: z.string().optional(),
   content: z.string().optional()
 })
@@ -16,6 +16,8 @@ interface CitationTooltipProps {
 }
 
 const CitationTooltip: React.FC<CitationTooltipProps> = ({ children, citation }) => {
+  const isWebUrl = citation.url?.startsWith('http') && !citation.url?.startsWith('http://file/')
+
   const hostname = useMemo(() => {
     try {
       return new URL(citation.url).hostname
@@ -29,14 +31,20 @@ const CitationTooltip: React.FC<CitationTooltipProps> = ({ children, citation })
   }, [citation.title, hostname])
 
   const handleClick = useCallback(() => {
-    window.open(citation.url, '_blank', 'noopener,noreferrer')
-  }, [citation.url])
+    if (isWebUrl) {
+      window.open(citation.url, '_blank', 'noopener,noreferrer')
+    }
+  }, [citation.url, isWebUrl])
 
   // 自定义悬浮卡片内容
   const tooltipContent = useMemo(
     () => (
       <div style={{ userSelect: 'text' }}>
-        <TooltipHeader role="button" aria-label={`Open ${sourceTitle} in new tab`} onClick={handleClick}>
+        <TooltipHeader
+          role={isWebUrl ? 'button' : undefined}
+          aria-label={isWebUrl ? `Open ${sourceTitle} in new tab` : sourceTitle}
+          onClick={handleClick}
+          style={isWebUrl ? undefined : { cursor: 'default' }}>
           <Favicon hostname={hostname} alt={sourceTitle} />
           <TooltipTitle role="heading" aria-level={3} title={sourceTitle}>
             {sourceTitle}
@@ -47,12 +55,14 @@ const CitationTooltip: React.FC<CitationTooltipProps> = ({ children, citation })
             {citation.content}
           </TooltipBody>
         )}
-        <TooltipFooter role="button" aria-label={`Visit ${hostname}`} onClick={handleClick}>
-          {hostname}
-        </TooltipFooter>
+        {isWebUrl && (
+          <TooltipFooter role="button" aria-label={`Visit ${hostname}`} onClick={handleClick}>
+            {hostname}
+          </TooltipFooter>
+        )}
       </div>
     ),
-    [citation.content, hostname, handleClick, sourceTitle]
+    [citation.content, hostname, handleClick, sourceTitle, isWebUrl]
   )
 
   return (

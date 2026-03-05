@@ -197,6 +197,19 @@ export const getFileFromUrl = async (url: string): Promise<FileMetadata | null> 
     }
   }
 
+  // Fallback: try to extract UUID from the last segment of the path
+  // This handles web server paths like /path/to/storage/files/uuid.ext
+  const lastSegment = url.replace(/\\/g, '/').split('/').pop()
+  if (lastSegment) {
+    const fileId = lastSegment.split('.')[0]
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(fileId)) {
+      const file = await FileManager.getFile(fileId)
+      if (file) {
+        return file
+      }
+    }
+  }
+
   return null
 }
 
@@ -286,7 +299,8 @@ export const searchKnowledgeBase = async (
       limitedResults.map(async (item) => {
         const file = await getFileFromUrl(item.metadata.source)
         logger.debug(`Knowledge search item: ${JSON.stringify(item)} File: ${JSON.stringify(file)}`)
-        return { ...item, file }
+        // Use locally resolved file first; fall back to server-provided file metadata
+        return { ...item, file: file || (item as any).file || null }
       })
     )
     if (topicId) {

@@ -51,7 +51,7 @@ import { addAbortController, removeAbortController } from '@renderer/utils/abort
 import { findFileBlocks, getMainTextContent } from '@renderer/utils/messageUtils/find'
 import { isSupportServiceTierProvider } from '@renderer/utils/provider'
 import { defaultTimeout } from '@shared/config/constant'
-import { defaultAppHeaders } from '@shared/utils'
+import { defaultAppHeaders } from '@renderer/utils/appHeaders'
 import { isEmpty } from 'lodash'
 
 import type { CompletionsContext } from '../middleware/types'

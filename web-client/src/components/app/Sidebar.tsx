@@ -11,7 +11,8 @@ import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { getSidebarIconLabel, getThemeModeLabel } from '@renderer/i18n/label'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { clearAuth, selectIsAdmin } from '@renderer/store/authStore'
+import { selectIsAdmin } from '@renderer/store/authStore'
+import { performLogout } from '@renderer/utils/logout'
 import { ThemeMode } from '@renderer/types'
 import { isEmoji } from '@renderer/utils'
 import { Avatar, Tooltip } from 'antd'
@@ -68,9 +69,7 @@ const Sidebar: FC = () => {
   }
 
   const handleLogout = () => {
-    dispatch(clearAuth())
-    window.location.href = window.location.origin + window.location.pathname + '#/login'
-    window.location.reload()
+    performLogout()
   }
 
   const isFullscreen = useFullscreen()

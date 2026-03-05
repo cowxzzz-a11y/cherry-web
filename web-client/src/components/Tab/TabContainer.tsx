@@ -12,7 +12,8 @@ import { getThemeModeLabel, getTitleLabel } from '@renderer/i18n/label'
 import UpdateAppButton from '@renderer/pages/home/components/UpdateAppButton'
 import tabsService from '@renderer/services/TabsService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { clearAuth, selectIsAdmin } from '@renderer/store/authStore'
+import { selectIsAdmin } from '@renderer/store/authStore'
+import { performLogout } from '@renderer/utils/logout'
 import type { Tab } from '@renderer/store/tabs'
 import { addTab, removeTab, setActiveTab, setTabs } from '@renderer/store/tabs'
 import type { MinAppType } from '@renderer/types'
@@ -213,9 +214,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
   }
 
   const handleLogout = () => {
-    dispatch(clearAuth())
-    window.location.href = window.location.origin + window.location.pathname + '#/login'
-    window.location.reload()
+    performLogout()
   }
 
   const handleTabClick = (tab: Tab) => {

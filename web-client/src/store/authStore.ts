@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './index'
 
 export interface AuthState {
@@ -27,7 +27,16 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuth: (state, action: PayloadAction<{ token: string; username: string; role: 'admin' | 'user'; userId: string; canEditPublicKB?: boolean }>) => {
+    setAuth: (
+      state,
+      action: PayloadAction<{
+        token: string
+        username: string
+        role: 'admin' | 'user'
+        userId: string
+        canEditPublicKB?: boolean
+      }>
+    ) => {
       state.token = action.payload.token
       state.username = action.payload.username
       state.role = action.payload.role
@@ -58,12 +67,14 @@ export const { setAuth, clearAuth } = authSlice.actions
 
 export const selectIsAuthenticated = (state: RootState) => !!state.auth?.token
 export const selectIsAdmin = (state: RootState) => state.auth?.role === 'admin'
-export const selectCanEditPublicKB = (state: RootState) => state.auth?.role === 'admin' || state.auth?.canEditPublicKB === true
+export const selectCanEditPublicKB = (state: RootState) =>
+  state.auth?.role === 'admin' || state.auth?.canEditPublicKB === true
 export const selectAuthToken = (state: RootState) => state.auth?.token
-export const selectAuthUser = (state: RootState) => ({
-  username: state.auth?.username,
-  role: state.auth?.role,
-  userId: state.auth?.userId
-})
+export const selectAuthUser = createSelector(
+  (state: RootState) => state.auth?.username,
+  (state: RootState) => state.auth?.role,
+  (state: RootState) => state.auth?.userId,
+  (username, role, userId) => ({ username, role, userId })
+)
 
 export default authSlice.reducer

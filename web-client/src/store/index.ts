@@ -54,13 +54,57 @@ import websearch from './websearch'
 
 const logger = loggerService.withContext('Store')
 
-// Use userId from localStorage to create per-user persist key
+// Shared persist key for all users — model config (llm, settings, etc.) is shared.
+const PERSIST_KEY = 'cherry-studio'
+
+// Per-user persist key for assistants (topics, knowledge_base selections, etc.)
 const persistUserId = localStorage.getItem('auth_userId')
-const persistKey = persistUserId ? `cherry-studio-${persistUserId}` : 'cherry-studio'
+const ASSISTANTS_PERSIST_KEY = persistUserId ? `cherry-assistants-${persistUserId}` : 'cherry-assistants'
+
+// One-time migration: if shared persist data doesn't exist, copy from any per-user key
+;(() => {
+  const sharedData = localStorage.getItem(`persist:${PERSIST_KEY}`)
+  if (!sharedData) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('persist:cherry-studio-') && key !== `persist:${PERSIST_KEY}`) {
+        const data = localStorage.getItem(key)
+        if (data) {
+          localStorage.setItem(`persist:${PERSIST_KEY}`, data)
+          break
+        }
+      }
+    }
+  }
+
+  // Seed per-user assistants data from shared persist if not yet split
+  if (persistUserId && !localStorage.getItem(`persist:${ASSISTANTS_PERSIST_KEY}`)) {
+    const source = localStorage.getItem(`persist:${PERSIST_KEY}`)
+    if (source) {
+      try {
+        const parsed = JSON.parse(source)
+        if (parsed.assistants) {
+          localStorage.setItem(`persist:${ASSISTANTS_PERSIST_KEY}`, parsed.assistants)
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
+})()
+
+// Per-user persisted assistants reducer (topics & KB selections are user-specific)
+const persistedAssistants = persistReducer(
+  {
+    key: ASSISTANTS_PERSIST_KEY,
+    storage
+  },
+  assistants
+)
 
 const rootReducer = combineReducers({
   auth,
-  assistants,
+  assistants: persistedAssistants,
   backup,
   codeTools,
   nutstore,
@@ -90,10 +134,10 @@ const rootReducer = combineReducers({
 
 const persistedReducer = persistReducer(
   {
-    key: persistKey,
+    key: PERSIST_KEY,
     storage,
     version: 200,
-    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions'],
+    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions', 'auth', 'assistants'],
     migrate
   },
   rootReducer

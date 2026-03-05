@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
+import { performLogout } from '@renderer/utils/logout'
 
 // Mock types needed
 type SpanContext = any
@@ -20,15 +21,8 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_username')
-      localStorage.removeItem('auth_role')
-      localStorage.removeItem('auth_userId')
-      localStorage.removeItem('auth_canEditPublicKB')
-      // Redirect to login (HashRouter)
       if (!window.location.hash?.includes('/login')) {
-        window.location.hash = '#/login'
-        window.location.reload()
+        performLogout()
       }
     }
     return Promise.reject(error)

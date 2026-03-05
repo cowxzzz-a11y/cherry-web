@@ -35,7 +35,10 @@ const LoginPage: FC = () => {
       localStorage.setItem('auth_canEditPublicKB', String(user.canEditPublicKB ?? false))
       message.success(`欢迎回来，${user.username}！`)
       // Reload to reinitialize store & database with user-specific keys
-      setTimeout(() => { window.location.href = window.location.origin + window.location.pathname + '#/' }, 500)
+      setTimeout(() => {
+        window.location.href = window.location.origin + window.location.pathname + '#/'
+        window.location.reload()
+      }, 500)
     } catch (err: unknown) {
       const errorMsg = (err as any)?.response?.data?.error || '登录失败'
       message.error(errorMsg)

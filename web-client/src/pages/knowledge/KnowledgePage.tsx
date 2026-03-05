@@ -61,7 +61,8 @@ const KnowledgePage: FC = () => {
   const getMenuItems = useCallback(
     (base: KnowledgeBase) => {
       const entry = base as any
-      const canModify = isAdmin || (entry.isPublic && canEditPublicKB) || (entry.ownerId === authUser.userId && !entry.isPublic)
+      const canModify =
+        isAdmin || (entry.isPublic && canEditPublicKB) || (entry.ownerId === authUser.userId && !entry.isPublic)
 
       const menus: MenuProps['items'] = []
 

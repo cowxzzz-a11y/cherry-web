@@ -48,7 +48,7 @@ import {
 import { getMainTextContent } from '@renderer/utils/messageUtils/find'
 import { getTopicQueue, waitForTopicQueue } from '@renderer/utils/queue'
 import { IpcChannel } from '@shared/IpcChannel'
-import { defaultAppHeaders } from '@shared/utils'
+import { defaultAppHeaders } from '@renderer/utils/appHeaders'
 import type { TextStreamPart } from 'ai'
 import { t } from 'i18next'
 import { isEmpty, throttle } from 'lodash'

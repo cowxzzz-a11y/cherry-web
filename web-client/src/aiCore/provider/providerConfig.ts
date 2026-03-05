@@ -34,7 +34,7 @@ import {
   isSupportStreamOptionsProvider,
   isVertexProvider
 } from '@renderer/utils/provider'
-import { defaultAppHeaders } from '@shared/utils'
+import { defaultAppHeaders } from '@renderer/utils/appHeaders'
 import { cloneDeep, isEmpty } from 'lodash'
 
 import type { AiSdkConfig } from '../types'

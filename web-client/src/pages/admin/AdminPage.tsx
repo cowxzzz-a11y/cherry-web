@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { clearAuth, selectAuthToken, selectIsAdmin } from '@renderer/store/authStore'
+import { selectAuthToken, selectIsAdmin } from '@renderer/store/authStore'
+import { performLogout } from '@renderer/utils/logout'
 import { Button, Card, Form, Input, message, Modal, Select, Space, Switch, Table, Tag, Typography } from 'antd'
 import axios from 'axios'
 import { LogOut, Plus, Trash2, UserCog } from 'lucide-react'
@@ -111,9 +112,7 @@ const AdminPage: FC = () => {
   }
 
   const handleLogout = () => {
-    dispatch(clearAuth())
-    window.location.href = window.location.origin + window.location.pathname + '#/login'
-    window.location.reload()
+    performLogout()
   }
 
   const columns = [
