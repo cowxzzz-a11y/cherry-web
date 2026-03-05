@@ -15,6 +15,25 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
+// Handle 401 responses: clear auth and redirect to login
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_username')
+      localStorage.removeItem('auth_role')
+      localStorage.removeItem('auth_userId')
+      // Redirect to login (HashRouter)
+      if (!window.location.hash?.includes('/login')) {
+        window.location.hash = '#/login'
+        window.location.reload()
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 // Global storage for pending files (File objects)
 // @ts-ignore
 window.__pendingFiles = window.__pendingFiles || new Map<string, File>()

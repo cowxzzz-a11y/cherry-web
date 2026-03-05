@@ -7,9 +7,13 @@ import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 import fs from 'fs'
 import { getProviderById } from '../utils/api-utils'
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth'
 
 const router = express.Router()
 const upload = multer({ dest: path.join(process.cwd(), 'storage', 'uploads') })
+
+// All knowledge base routes require authentication
+router.use(requireAuth as any)
 
 function normalizeProviderId(base: any): string | undefined {
   if (typeof base?.embedApiClient?.provider === 'string') return base.embedApiClient.provider
@@ -88,16 +92,27 @@ async function getKnowledgeBaseParams(base: any) {
   }
 }
 
-// List all knowledge bases
-router.get('/', (req, res) => {
-  const bases = knowledgeBaseStore.getAll()
+// List knowledge bases visible to the current user
+router.get('/', (req: AuthenticatedRequest, res) => {
+  const user = req.user!
+  const bases = knowledgeBaseStore.getForUser(user.id, user.role)
   res.json(bases)
 })
 
-// Create knowledge base
-router.post('/', async (req, res) => {
+// Create knowledge base (stamps ownerId from current user)
+router.post('/', async (req: AuthenticatedRequest, res) => {
   const base = req.body
+  const user = req.user!
   if (!base.id) base.id = uuidv4()
+
+  // Stamp ownership: public bases have no owner; private bases belong to creator
+  if (!base.isPublic) {
+    base.ownerId = user.id
+  }
+  // Only admins or users with canEditPublicKB can create public knowledge bases
+  if (base.isPublic && user.role !== 'admin' && !user.canEditPublicKB) {
+    return res.status(403).json({ error: 'You do not have permission to create public knowledge bases' })
+  }
 
   try {
     const baseParams = await getKnowledgeBaseParams(base)
@@ -118,9 +133,14 @@ router.post('/', async (req, res) => {
 })
 
 // Update knowledge base metadata
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
   const updates = req.body
+  const user = req.user!
+
+  if (!knowledgeBaseStore.canModify(id, user.id, user.role, user.canEditPublicKB)) {
+    return res.status(403).json({ error: 'You do not have permission to modify this knowledge base' })
+  }
 
   const existing = knowledgeBaseStore.get(id)
   if (!existing) return res.status(404).json({ error: 'Knowledge base not found' })
@@ -139,8 +159,13 @@ router.put('/:id', async (req, res) => {
 })
 
 // Delete knowledge base
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
+  const user = req.user!
+
+  if (!knowledgeBaseStore.canModify(id, user.id, user.role, user.canEditPublicKB)) {
+    return res.status(403).json({ error: 'You do not have permission to delete this knowledge base' })
+  }
 
   try {
     // Best-effort vector DB cleanup; ignore errors (e.g. missing API key)
@@ -157,9 +182,14 @@ router.delete('/:id', async (req, res) => {
 })
 
 // Upload file to knowledge base
-router.post('/:id/upload', upload.single('file'), async (req, res) => {
+router.post('/:id/upload', upload.single('file'), async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
+  const user = req.user!
   const file = req.file
+
+  if (!knowledgeBaseStore.canModify(id, user.id, user.role, user.canEditPublicKB)) {
+    return res.status(403).json({ error: 'You do not have permission to upload to this knowledge base' })
+  }
 
   if (!file) {
     return res.status(400).json({ error: 'No file uploaded' })
@@ -275,9 +305,14 @@ router.post('/:id/upload', upload.single('file'), async (req, res) => {
 })
 
 // Remove item from knowledge base (delete vectors + remove from store)
-router.post('/:id/remove', async (req, res) => {
+router.post('/:id/remove', async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
   const { uniqueId, uniqueIds, base: requestBase } = req.body
+  const user = req.user!
+
+  if (!knowledgeBaseStore.canModify(id, user.id, user.role, user.canEditPublicKB)) {
+    return res.status(403).json({ error: 'You do not have permission to modify this knowledge base' })
+  }
 
   if (!uniqueId && (!uniqueIds || !Array.isArray(uniqueIds) || uniqueIds.length === 0)) {
     return res.status(400).json({ error: 'uniqueId or uniqueIds is required' })
@@ -315,9 +350,14 @@ router.post('/:id/remove', async (req, res) => {
   }
 })
 // Search
-router.post('/:id/search', async (req, res) => {
+router.post('/:id/search', async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
   const { query, base: requestBase } = req.body
+  const user = req.user!
+
+  if (!knowledgeBaseStore.canAccess(id, user.id, user.role)) {
+    return res.status(403).json({ error: 'You do not have permission to access this knowledge base' })
+  }
 
   const base = knowledgeBaseStore.get(id) || requestBase
   if (!base) {
@@ -358,9 +398,14 @@ router.post('/:id/search', async (req, res) => {
 })
 
 // Rerank
-router.post('/:id/rerank', async (req, res) => {
+router.post('/:id/rerank', async (req: AuthenticatedRequest, res) => {
   const { id } = req.params as { id: string }
   const { search, base: requestBase, results } = req.body
+  const user = req.user!
+
+  if (!knowledgeBaseStore.canAccess(id, user.id, user.role)) {
+    return res.status(403).json({ error: 'You do not have permission to access this knowledge base' })
+  }
 
   const base = knowledgeBaseStore.get(id) || requestBase
   if (!base) return res.status(404).json({ error: 'Knowledge base not found' })
@@ -388,7 +433,7 @@ router.post('/:id/rerank', async (req, res) => {
 })
 
 // Test embedding configuration (diagnostic endpoint)
-router.post('/test-embedding', async (req, res) => {
+router.post('/test-embedding', async (req: AuthenticatedRequest, res) => {
   const { base: requestBase } = req.body
   if (!requestBase?.embedApiClient) {
     return res.status(400).json({ error: 'embedApiClient is required' })

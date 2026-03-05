@@ -83,6 +83,21 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     window.api.setTheme(settedTheme)
+
+    // In web mode (no Electron IPC), compute actualTheme directly from settedTheme
+    // because the ThemeUpdated IPC channel never fires in the browser.
+    const isRealElectron = typeof window.electron?.process?.platform === 'string'
+    if (!isRealElectron) {
+      if (settedTheme === ThemeMode.dark) {
+        setActualTheme(ThemeMode.dark)
+      } else if (settedTheme === ThemeMode.light) {
+        setActualTheme(ThemeMode.light)
+      } else {
+        // system mode: use media query
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        setActualTheme(prefersDark ? ThemeMode.dark : ThemeMode.light)
+      }
+    }
   }, [settedTheme])
 
   return (

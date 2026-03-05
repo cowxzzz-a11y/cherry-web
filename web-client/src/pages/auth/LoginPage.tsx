@@ -27,7 +27,7 @@ const LoginPage: FC = () => {
     try {
       const res = await axios.post(`${API_BASE}/auth/login`, values)
       const { token, user } = res.data
-      dispatch(setAuth({ token, username: user.username, role: user.role, userId: user.id }))
+      dispatch(setAuth({ token, username: user.username, role: user.role, userId: user.id, canEditPublicKB: user.canEditPublicKB }))
       message.success(`欢迎回来，${user.username}！`)
       navigate('/')
     } catch (err: unknown) {
@@ -42,7 +42,7 @@ const LoginPage: FC = () => {
         <LogoSection>
           <img src={AppLogo} alt="Logo" style={{ width: 80, height: 80, borderRadius: 16 }} />
           <AppTitle>知识库</AppTitle>
-          <AppSubtitle>内网知识管理系统</AppSubtitle>
+          <AppSubtitle>"地智"知识库平台</AppSubtitle>
         </LogoSection>
         <Form form={form} onFinish={handleLogin} layout="vertical" size="large">
           <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
@@ -57,7 +57,6 @@ const LoginPage: FC = () => {
             </Button>
           </Form.Item>
         </Form>
-        <FooterText>首次使用默认账号: admin / admin123</FooterText>
       </LoginCard>
     </LoginContainer>
   )
@@ -93,20 +92,13 @@ const LogoSection = styled.div`
 const AppTitle = styled.h1`
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text-1, #333);
   margin: 12px 0 4px 0;
 `
 
 const AppSubtitle = styled.p`
   font-size: 14px;
   color: #999;
-  margin: 0;
-`
-
-const FooterText = styled.p`
-  text-align: center;
-  font-size: 12px;
-  color: #bbb;
   margin: 0;
 `
 

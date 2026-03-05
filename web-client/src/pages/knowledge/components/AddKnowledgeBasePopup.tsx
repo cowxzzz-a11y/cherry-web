@@ -3,6 +3,8 @@ import { TopView } from '@renderer/components/TopView'
 import { useKnowledgeBases } from '@renderer/hooks/useKnowledge'
 import { useKnowledgeBaseForm } from '@renderer/hooks/useKnowledgeBaseForm'
 import { getKnowledgeBaseParams } from '@renderer/services/KnowledgeService'
+import { useAppSelector } from '@renderer/store'
+import { selectAuthUser } from '@renderer/store/authStore'
 import type { KnowledgeBase } from '@renderer/types'
 import { formatErrorMessage } from '@renderer/utils/error'
 import { useState } from 'react'
@@ -31,6 +33,7 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ title, isPublic, resolv
   const [submitting, setSubmitting] = useState(false)
   const { t } = useTranslation()
   const { addKnowledgeBase } = useKnowledgeBases()
+  const authUser = useAppSelector(selectAuthUser)
   const isRealElectron = typeof window.electron?.process?.platform === 'string'
   const {
     newBase,
@@ -59,7 +62,7 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ title, isPublic, resolv
         ...newBase,
         created_at: Date.now(),
         updated_at: Date.now(),
-        ...(isPublic ? { isPublic: true } : {})
+        ...(isPublic ? { isPublic: true } : { ownerId: authUser.userId })
       }
 
       const payload = isRealElectron ? getKnowledgeBaseParams(_newBase) : _newBase

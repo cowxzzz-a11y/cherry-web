@@ -23,6 +23,7 @@ import SettingsPage from './pages/settings/SettingsPage'
 import AssistantPresetsPage from './pages/store/assistants/presets/AssistantPresetsPage'
 import TranslatePage from './pages/translate/TranslatePage'
 import LoginPage from './pages/auth/LoginPage'
+import AdminPage from './pages/admin/AdminPage'
 import { useAppSelector } from './store'
 import { selectIsAuthenticated, selectIsAdmin } from './store/authStore'
 
@@ -51,19 +52,122 @@ const Router: FC = () => {
       <ErrorBoundary>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/store" element={<ProtectedRoute><AssistantPresetsPage /></ProtectedRoute>} />
-          <Route path="/paintings/*" element={<ProtectedRoute><PaintingsRoutePage /></ProtectedRoute>} />
-          <Route path="/translate" element={<ProtectedRoute><TranslatePage /></ProtectedRoute>} />
-          <Route path="/files" element={<ProtectedRoute><FilesPage /></ProtectedRoute>} />
-          <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
-          <Route path="/knowledge" element={<ProtectedRoute><KnowledgePage /></ProtectedRoute>} />
-          <Route path="/apps/:appId" element={<ProtectedRoute><MinAppPage /></ProtectedRoute>} />
-          <Route path="/apps" element={<ProtectedRoute><MinAppsPage /></ProtectedRoute>} />
-          <Route path="/code" element={<ProtectedRoute><CodeToolsPage /></ProtectedRoute>} />
-          <Route path="/openclaw" element={<ProtectedRoute><OpenClawPage /></ProtectedRoute>} />
-          <Route path="/settings/*" element={<ProtectedRoute><AdminRoute><SettingsPage /></AdminRoute></ProtectedRoute>} />
-          <Route path="/launchpad" element={<ProtectedRoute><LaunchpadPage /></ProtectedRoute>} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/store"
+            element={
+              <ProtectedRoute>
+                <AssistantPresetsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/paintings/*"
+            element={
+              <ProtectedRoute>
+                <PaintingsRoutePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/translate"
+            element={
+              <ProtectedRoute>
+                <TranslatePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/files"
+            element={
+              <ProtectedRoute>
+                <FilesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notes"
+            element={
+              <ProtectedRoute>
+                <NotesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/knowledge"
+            element={
+              <ProtectedRoute>
+                <KnowledgePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/apps/:appId"
+            element={
+              <ProtectedRoute>
+                <MinAppPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/apps"
+            element={
+              <ProtectedRoute>
+                <MinAppsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/code"
+            element={
+              <ProtectedRoute>
+                <CodeToolsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/openclaw"
+            element={
+              <ProtectedRoute>
+                <OpenClawPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/*"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <SettingsPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/launchpad"
+            element={
+              <ProtectedRoute>
+                <LaunchpadPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </ErrorBoundary>
     )

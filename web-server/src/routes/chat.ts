@@ -1,4 +1,3 @@
-
 import type { ChatCompletionCreateParams } from 'openai/resources'
 import type { Request, Response } from 'express'
 import express from 'express'
@@ -9,10 +8,14 @@ import {
   chatCompletionService,
   ChatCompletionValidationError
 } from '../services/chat-completion'
+import { requireAuth } from '../middleware/auth'
 
 const logger = loggerService.withContext('ApiServerChatRoutes')
 
 const router = express.Router()
+
+// All chat routes require authentication
+router.use(requireAuth as any)
 
 interface ErrorResponseBody {
   error: {

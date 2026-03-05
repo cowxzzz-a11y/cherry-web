@@ -7,6 +7,8 @@ import Scrollbar from '@renderer/components/Scrollbar'
 import { useKnowledgeBases } from '@renderer/hooks/useKnowledge'
 import { useShortcut } from '@renderer/hooks/useShortcuts'
 import KnowledgeSearchPopup from '@renderer/pages/knowledge/components/KnowledgeSearchPopup'
+import { useAppSelector } from '@renderer/store'
+import { selectAuthUser, selectCanEditPublicKB, selectIsAdmin } from '@renderer/store/authStore'
 import type { KnowledgeBase } from '@renderer/types'
 import type { MenuProps } from 'antd'
 import { Dropdown, Empty } from 'antd'
@@ -25,9 +27,14 @@ const KnowledgePage: FC = () => {
   const { bases, renameKnowledgeBase, deleteKnowledgeBase, updateKnowledgeBases } = useKnowledgeBases()
   const [selectedBase, setSelectedBase] = useState<KnowledgeBase | undefined>(bases[0])
   const [isDragging, setIsDragging] = useState(false)
+  const authUser = useAppSelector(selectAuthUser)
+  const isAdmin = useAppSelector(selectIsAdmin)
+  const canEditPublicKB = useAppSelector(selectCanEditPublicKB)
 
   const publicBases = bases.filter((b) => (b as any).isPublic === true)
-  const userBases = bases.filter((b) => (b as any).isPublic !== true)
+  const userBases = bases.filter(
+    (b) => (b as any).isPublic !== true && ((b as any).ownerId === authUser.userId || isAdmin)
+  )
 
   const handleAddKnowledge = useCallback(
     async (isPublic?: boolean) => {
@@ -53,8 +60,13 @@ const KnowledgePage: FC = () => {
 
   const getMenuItems = useCallback(
     (base: KnowledgeBase) => {
-      const menus: MenuProps['items'] = [
-        {
+      const entry = base as any
+      const canModify = isAdmin || (entry.isPublic && canEditPublicKB) || (entry.ownerId === authUser.userId && !entry.isPublic)
+
+      const menus: MenuProps['items'] = []
+
+      if (canModify) {
+        menus.push({
           label: t('knowledge.rename'),
           key: 'rename',
           icon: <EditIcon size={14} />,
@@ -68,15 +80,18 @@ const KnowledgePage: FC = () => {
               renameKnowledgeBase(base.id, name)
             }
           }
-        },
-        {
-          label: t('common.settings'),
-          key: 'settings',
-          icon: <Settings size={14} />,
-          onClick: () => handleEditKnowledgeBase(base)
-        },
-        { type: 'divider' } as any,
-        {
+        })
+      }
+
+      menus.push({
+        label: t('common.settings'),
+        key: 'settings',
+        icon: <Settings size={14} />,
+        onClick: () => handleEditKnowledgeBase(base)
+      })
+
+      if (canModify) {
+        menus.push({ type: 'divider' } as any, {
           label: t('common.delete'),
           danger: true,
           key: 'delete',
@@ -91,12 +106,12 @@ const KnowledgePage: FC = () => {
               }
             })
           }
-        }
-      ]
+        })
+      }
 
       return menus
     },
-    [deleteKnowledgeBase, handleEditKnowledgeBase, renameKnowledgeBase, t]
+    [authUser.userId, isAdmin, canEditPublicKB, deleteKnowledgeBase, handleEditKnowledgeBase, renameKnowledgeBase, t]
   )
 
   useShortcut('search_message', () => {
@@ -115,9 +130,11 @@ const KnowledgePage: FC = () => {
           {/* Public Bases */}
           <SectionHeader>
             <SectionTitle>{t('knowledge.public') || 'Public Knowledge'}</SectionTitle>
-            <AddSectionButton onClick={() => handleAddKnowledge(true)}>
-              <Plus size={14} />
-            </AddSectionButton>
+            {canEditPublicKB && (
+              <AddSectionButton onClick={() => handleAddKnowledge(true)}>
+                <Plus size={14} />
+              </AddSectionButton>
+            )}
           </SectionHeader>
           {publicBases.map((base) => (
             <Dropdown menu={{ items: getMenuItems(base) }} trigger={['contextMenu']} key={base.id}>

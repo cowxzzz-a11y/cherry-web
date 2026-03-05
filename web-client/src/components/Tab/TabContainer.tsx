@@ -12,6 +12,7 @@ import { getThemeModeLabel, getTitleLabel } from '@renderer/i18n/label'
 import UpdateAppButton from '@renderer/pages/home/components/UpdateAppButton'
 import tabsService from '@renderer/services/TabsService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
+import { clearAuth, selectIsAdmin } from '@renderer/store/authStore'
 import type { Tab } from '@renderer/store/tabs'
 import { addTab, removeTab, setActiveTab, setTabs } from '@renderer/store/tabs'
 import type { MinAppType } from '@renderer/types'
@@ -25,6 +26,7 @@ import {
   Home,
   Languages,
   LayoutGrid,
+  LogOut,
   Monitor,
   Moon,
   NotepadText,
@@ -33,6 +35,7 @@ import {
   Sparkle,
   Sun,
   Terminal,
+  Users,
   X
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -128,6 +131,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
   const { minapps } = useMinapps()
   const { useSystemTitleBar } = useSettings()
   const { t } = useTranslation()
+  const isAdmin = useAppSelector(selectIsAdmin)
 
   const getTabId = (path: string): string => {
     if (path === '/') return 'home'
@@ -206,6 +210,11 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
   const handleSettingsClick = () => {
     hideMinappPopup()
     navigate(lastSettingsPath)
+  }
+
+  const handleLogout = () => {
+    dispatch(clearAuth())
+    navigate('/login')
   }
 
   const handleTabClick = (tab: Tab) => {
@@ -290,9 +299,23 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
               )}
             </ThemeButton>
           </Tooltip>
-          <SettingsButton onClick={handleSettingsClick} $active={activeTabId === 'settings'}>
-            <Settings size={16} />
-          </SettingsButton>
+          {isAdmin && (
+            <SettingsButton onClick={handleSettingsClick} $active={activeTabId === 'settings'}>
+              <Settings size={16} />
+            </SettingsButton>
+          )}
+          {isAdmin && (
+            <Tooltip title="用户管理" mouseEnterDelay={0.8} placement="bottom">
+              <ThemeButton onClick={() => navigate('/admin')}>
+                <Users size={16} />
+              </ThemeButton>
+            </Tooltip>
+          )}
+          <Tooltip title="退出登录" mouseEnterDelay={0.8} placement="bottom">
+            <LogoutButton onClick={handleLogout}>
+              <LogOut size={16} />
+            </LogoutButton>
+          </Tooltip>
         </RightButtonsContainer>
         <WindowControls />
       </TabsBar>
@@ -435,6 +458,21 @@ const SettingsButton = styled.div<{ $active: boolean }>`
   background: ${(props) => (props.$active ? 'var(--color-list-item)' : 'transparent')};
   &:hover {
     background: var(--color-list-item);
+  }
+`
+
+const LogoutButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: var(--color-text);
+  border-radius: 8px;
+  &:hover {
+    background: var(--color-list-item);
+    color: var(--color-error, #ff4d4f);
   }
 `
 

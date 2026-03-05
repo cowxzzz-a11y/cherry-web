@@ -29,7 +29,8 @@ import {
   Palette,
   Settings,
   Sparkle,
-  Sun
+  Sun,
+  Users
 } from 'lucide-react'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -120,6 +121,19 @@ const Sidebar: FC = () => {
               }}>
               <Icon theme={theme} className={pathname.startsWith('/settings') && !minappShow ? 'active' : ''}>
                 <Settings size={20} className="icon" />
+              </Icon>
+            </StyledLink>
+          </Tooltip>
+        )}
+        {isAdmin && (
+          <Tooltip title="用户管理" mouseEnterDelay={0.8} placement="right">
+            <StyledLink
+              onClick={async () => {
+                hideMinappPopup()
+                await to('/admin')
+              }}>
+              <Icon theme={theme} className={pathname === '/admin' && !minappShow ? 'active' : ''}>
+                <Users size={20} className="icon" />
               </Icon>
             </StyledLink>
           </Tooltip>

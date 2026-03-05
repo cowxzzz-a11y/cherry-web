@@ -128,8 +128,48 @@ export class KnowledgeBaseStore {
     fs.outputJsonSync(DB_FILE, this.bases, { spaces: 2 })
   }
 
+  /** Return ALL bases (admin use / internal) */
   getAll() {
     return this.bases
+  }
+
+  /**
+   * Return bases visible to a specific user:
+   *  - All public bases (isPublic === true)
+   *  - Bases owned by this user (ownerId === userId)
+   *  - If user is admin, return all bases
+   */
+  getForUser(userId: string, role: 'admin' | 'user') {
+    if (role === 'admin') return this.bases
+    return this.bases.filter((b) => {
+      const entry = b as any
+      return entry.isPublic === true || entry.ownerId === userId
+    })
+  }
+
+  /**
+   * Check if a user can access (read) a specific knowledge base.
+   */
+  canAccess(baseId: string, userId: string, role: 'admin' | 'user'): boolean {
+    const base = this.get(baseId)
+    if (!base) return false
+    if (role === 'admin') return true
+    const entry = base as any
+    return entry.isPublic === true || entry.ownerId === userId
+  }
+
+  /**
+   * Check if a user can modify (update/delete) a specific knowledge base.
+   * Public bases can be modified by admins, or by users with canEditPublicKB permission.
+   */
+  canModify(baseId: string, userId: string, role: 'admin' | 'user', canEditPublicKB?: boolean): boolean {
+    const base = this.get(baseId)
+    if (!base) return false
+    if (role === 'admin') return true
+    const entry = base as any
+    // Regular users with canEditPublicKB can modify public bases
+    if (entry.isPublic === true) return canEditPublicKB === true
+    return entry.ownerId === userId
   }
 
   add(base: KnowledgeBase) {

@@ -101,6 +101,27 @@ router.delete('/users/:id', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+// Update user (admin only) – toggle permissions like canEditPublicKB
+router.put('/users/:id', (req: Request, res: Response) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
+  const currentUser = userStore.getUserByToken(token);
+  if (!currentUser || currentUser.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  const { id } = req.params as { id: string };
+  const { canEditPublicKB } = req.body;
+  const updated = userStore.updateUser(id, { canEditPublicKB });
+  if (!updated) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const { passwordHash, ...userInfo } = updated;
+  res.json(userInfo);
+});
+
 // Change password
 router.put('/password', (req: Request, res: Response) => {
   const token = req.headers.authorization?.replace('Bearer ', '');

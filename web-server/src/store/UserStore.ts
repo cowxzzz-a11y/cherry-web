@@ -9,6 +9,7 @@ export interface User {
   username: string;
   passwordHash: string;
   role: 'admin' | 'user';
+  canEditPublicKB?: boolean;
   created_at: string;
 }
 
@@ -55,8 +56,8 @@ export class UserStore {
     if (!this.users.find(u => u.role === 'admin')) {
       this.users.push({
         id: uuidv4(),
-        username: 'admin',
-        passwordHash: hashPassword('admin123'),
+        username: 'cowx',
+        passwordHash: hashPassword('123456'),
         role: 'admin',
         created_at: new Date().toISOString()
       });
@@ -136,6 +137,16 @@ export class UserStore {
     user.passwordHash = hashPassword(newPassword);
     this.saveUsers();
     return true;
+  }
+
+  updateUser(id: string, updates: { canEditPublicKB?: boolean }): User | null {
+    const user = this.users.find(u => u.id === id);
+    if (!user) return null;
+    if (typeof updates.canEditPublicKB === 'boolean') {
+      user.canEditPublicKB = updates.canEditPublicKB;
+    }
+    this.saveUsers();
+    return user;
   }
 }
 
