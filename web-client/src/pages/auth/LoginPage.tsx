@@ -27,9 +27,15 @@ const LoginPage: FC = () => {
     try {
       const res = await axios.post(`${API_BASE}/auth/login`, values)
       const { token, user } = res.data
-      dispatch(setAuth({ token, username: user.username, role: user.role, userId: user.id, canEditPublicKB: user.canEditPublicKB }))
+      // Save auth to localStorage directly (store will reinitialize on reload)
+      localStorage.setItem('auth_token', token)
+      localStorage.setItem('auth_username', user.username)
+      localStorage.setItem('auth_role', user.role)
+      localStorage.setItem('auth_userId', user.id)
+      localStorage.setItem('auth_canEditPublicKB', String(user.canEditPublicKB ?? false))
       message.success(`欢迎回来，${user.username}！`)
-      navigate('/')
+      // Reload to reinitialize store & database with user-specific keys
+      setTimeout(() => { window.location.href = window.location.origin + window.location.pathname + '#/' }, 500)
     } catch (err: unknown) {
       const errorMsg = (err as any)?.response?.data?.error || '登录失败'
       message.error(errorMsg)

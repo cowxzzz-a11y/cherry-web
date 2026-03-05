@@ -214,7 +214,8 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
 
   const handleLogout = () => {
     dispatch(clearAuth())
-    navigate('/login')
+    window.location.href = window.location.origin + window.location.pathname + '#/login'
+    window.location.reload()
   }
 
   const handleTabClick = (tab: Tab) => {

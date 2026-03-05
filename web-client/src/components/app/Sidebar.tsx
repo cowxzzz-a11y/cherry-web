@@ -69,7 +69,8 @@ const Sidebar: FC = () => {
 
   const handleLogout = () => {
     dispatch(clearAuth())
-    navigate('/login')
+    window.location.href = window.location.origin + window.location.pathname + '#/login'
+    window.location.reload()
   }
 
   const isFullscreen = useFullscreen()

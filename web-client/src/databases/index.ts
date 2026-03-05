@@ -27,8 +27,12 @@ import { Dexie, type EntityTable } from 'dexie'
 
 import { upgradeToV5, upgradeToV7, upgradeToV8 } from './upgrades'
 
+// Use userId from localStorage to create per-user database
+const userId = localStorage.getItem('auth_userId')
+const dbName = userId ? `CherryStudio_${userId}` : 'CherryStudio'
+
 // Database declaration (move this to its own module also)
-export const db = new Dexie('CherryStudio', {
+export const db = new Dexie(dbName, {
   chromeTransactionDurability: 'strict'
 }) as Dexie & {
   files: EntityTable<FileMetadata, 'id'>

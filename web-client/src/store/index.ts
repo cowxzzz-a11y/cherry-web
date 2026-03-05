@@ -54,6 +54,10 @@ import websearch from './websearch'
 
 const logger = loggerService.withContext('Store')
 
+// Use userId from localStorage to create per-user persist key
+const persistUserId = localStorage.getItem('auth_userId')
+const persistKey = persistUserId ? `cherry-studio-${persistUserId}` : 'cherry-studio'
+
 const rootReducer = combineReducers({
   auth,
   assistants,
@@ -86,7 +90,7 @@ const rootReducer = combineReducers({
 
 const persistedReducer = persistReducer(
   {
-    key: 'cherry-studio',
+    key: persistKey,
     storage,
     version: 200,
     blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions'],

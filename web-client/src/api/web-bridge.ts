@@ -24,6 +24,7 @@ axios.interceptors.response.use(
       localStorage.removeItem('auth_username')
       localStorage.removeItem('auth_role')
       localStorage.removeItem('auth_userId')
+      localStorage.removeItem('auth_canEditPublicKB')
       // Redirect to login (HashRouter)
       if (!window.location.hash?.includes('/login')) {
         window.location.hash = '#/login'
