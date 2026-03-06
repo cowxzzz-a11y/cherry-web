@@ -14,8 +14,24 @@ export function performLogout() {
   localStorage.removeItem('auth_userId')
   localStorage.removeItem('auth_canEditPublicKB')
 
-  // 2. Do NOT clear persist data — model config is shared across users.
-  //    Auth is blacklisted from persist, so no stale auth rehydration.
+  // 2. Clear user-specific persist data to prevent knowledge base leakage across users.
+  //    The knowledge slice is persisted in the shared persist key, so we need to
+  //    remove the knowledge bases from the persisted state on logout.
+  try {
+    const persistKey = 'persist:cherry-studio'
+    const raw = localStorage.getItem(persistKey)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed.knowledge) {
+        const knowledgeState = JSON.parse(parsed.knowledge)
+        knowledgeState.bases = []
+        parsed.knowledge = JSON.stringify(knowledgeState)
+        localStorage.setItem(persistKey, JSON.stringify(parsed))
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
 
   // 3. Hard navigate — no Redux dispatch, no React re-render race
   window.location.href = window.location.origin + window.location.pathname + '#/login'

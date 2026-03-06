@@ -45,12 +45,8 @@ const KnowledgeBaseLoader = () => {
             processedIds.add(sb.id)
           }
 
-          // Add any local-only bases (not on server)
-          for (const lb of localBasesRef.current) {
-            if (!processedIds.has((lb as any)?.id)) {
-              merged.push(lb)
-            }
-          }
+          // In web mode, server is the authoritative source for knowledge base ownership.
+          // Do NOT add local-only bases — they may belong to a different user session.
 
           dispatch(updateBases(merged as any))
         })

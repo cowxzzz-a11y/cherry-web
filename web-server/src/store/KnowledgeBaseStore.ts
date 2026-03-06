@@ -137,10 +137,8 @@ export class KnowledgeBaseStore {
    * Return bases visible to a specific user:
    *  - All public bases (isPublic === true)
    *  - Bases owned by this user (ownerId === userId)
-   *  - If user is admin, return all bases
    */
   getForUser(userId: string, role: 'admin' | 'user') {
-    if (role === 'admin') return this.bases
     return this.bases.filter((b) => {
       const entry = b as any
       return entry.isPublic === true || entry.ownerId === userId
